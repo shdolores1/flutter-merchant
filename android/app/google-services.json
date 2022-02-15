@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "296176706009",
+    "project_id": "flutter-merchant-ada35",
+    "storage_bucket": "flutter-merchant-ada35.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296176706009:android:d4ee318fc732de8326b9c8",
+        "android_client_info": {
+          "package_name": "com.example.flutter_merchant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "296176706009-kha58gfi1om7rn0irt24k5tblsruj2i4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJbCzziM-DeoHXCCLcrtBYwJ0QYwvttuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "296176706009-kha58gfi1om7rn0irt24k5tblsruj2i4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
