@@ -5,7 +5,7 @@ class MerchantColors {
   static const Color highlight_blue = Color.fromRGBO(78, 203, 244, 1);
   static const Color red = Color.fromRGBO(244, 93, 93, 1);
 
-  static const Color dark_grey = Color(0xFFC4C4C4);
+  static const Color light_grey = Color(0xFFC4C4C4);
   static const Color grey = Color.fromRGBO(118, 118, 118, 1);
   static const Color white = Colors.white;
   static const Color black = Colors.black;
@@ -54,6 +54,14 @@ class MerchantTextStyle {
 }
 
 class MerchantDecoration {
+  static OutlineInputBorder outlineBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide(
+      color: MerchantColors.blue,
+      width: 2.0,
+    ),
+  );
+
   static BoxDecoration cardDecoration = BoxDecoration(
     borderRadius: BorderRadius.circular(20.0),
     boxShadow: [
@@ -65,6 +73,24 @@ class MerchantDecoration {
       ),
     ],
     color: MerchantColors.white,
+  );
+
+  static BoxDecoration cardListDecoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(10.0),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.5),
+        spreadRadius: 1,
+        blurRadius: 3,
+        offset: Offset(0, 2),
+      ),
+    ],
+    color: MerchantColors.white,
+  );
+
+  static BoxDecoration containerDecoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(10.0),
+    color: MerchantColors.light_grey,
   );
 
   static BoxDecoration customBtnDecoration = BoxDecoration(

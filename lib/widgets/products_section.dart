@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
 import 'package:flutter_merchant/main.dart';
 import 'package:flutter_merchant/models/product.dart';
-import 'package:flutter_merchant/widgets/common_error_dialog.dart';
+import 'package:flutter_merchant/providers/product_provider.dart';
+import 'package:flutter_merchant/widgets/common_dialog.dart';
 import 'package:flutter_merchant/widgets/product_card.dart';
+import 'package:provider/provider.dart';
 
 class ProductsSection extends StatefulWidget {
   @override
@@ -16,41 +18,45 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
 
   Future<void> _initProducts() async {
     try {
-      _isLoading = false;
+      _productList =
+          Provider.of<ProductProvider>(context, listen: false).products;
+      setState(() {
+        _isLoading = false;
+      });
+      /*
+      Provider.of<ProductProvider>(context, listen: false)
+          .getAllProducts()
+          .then((value) {
+        setState(() {
+          _productList = value;
+          _isLoading = false;
+        });
+      });
+      */
     } catch (error) {
       print('Error: ' + error.toString());
-      _isLoading = false;
+      setState(() {
+        _isLoading = false;
+      });
       showDialog(
         context: context,
-        builder: (BuildContext context) => CommonErrorDialog("Oops!",
+        builder: (BuildContext context) => CommonDialog("Oops!",
             "There was an error while loading your products. Please try again."),
       );
     }
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _initProducts();
-  }
-
-  @override
-  void didPopNext() {
-    super.didPopNext();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => _initProducts());
-  }
-
-  @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => _initProducts());
+    WidgetsBinding.instance?.addPostFrameCallback((_) => _initProducts());
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return Container(
-      height: mediaQuery.size.height,
+      height: mediaQuery.size.height / 1.3,
       padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
       decoration: MerchantDecoration.productsSectionDecoration,
       child: Column(
@@ -65,9 +71,7 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
               ),
             ],
           ),
-          SizedBox(
-            height: 15,
-          ),
+          Divider(),
           _isLoading
               ? Center(
                   child: CircularProgressIndicator(
@@ -79,13 +83,36 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
                       "No pending bookings yet.",
                       style: TextStyle(color: Colors.grey),
                     )
-                  : Column(children: <Widget>[
-                      ..._productList
-                          .map((product) => ProductCard(
-                                product: product,
-                              ))
-                          .toList()
-                    ]),
+                  :
+                  // Column(
+                  //     children: <Widget>[
+                  //       ..._productList
+                  //           .map((product) => ProductCard(
+                  //                 product: product,
+                  //               ))
+                  //           .toList()
+                  //     ],
+                  //   ),
+                  Consumer<ProductProvider>(
+                      builder: (context, provider, listTile) {
+                      return Expanded(
+                        child: MediaQuery.removePadding(
+                          context: context,
+                          removeTop: true,
+                          child: ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            physics: ClampingScrollPhysics(),
+                            itemCount: _productList.length,
+                            itemBuilder: (context, index) {
+                              return ProductCard(
+                                product: _productList[index],
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    }),
         ],
       ),
     );

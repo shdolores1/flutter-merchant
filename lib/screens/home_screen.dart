@@ -19,16 +19,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Container(
-          color: MerchantColors.blue,
+          decoration: MerchantDecoration.loginBgDecoration,
           width: mediaQuery.size.width,
-          // padding: EdgeInsets.symmetric(vertical: 40, horizontal: 15),
           child: Column(
             children: <Widget>[
               HeaderSection(),
               AddProductSection(),
               SizedBox(height: 20),
               ProductsSection(),
-              //PendingBookingsSection(updateIndex: widget.updateIndex),
             ],
           ),
         ),
