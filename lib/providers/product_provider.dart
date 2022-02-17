@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/api_endpoints.dart';
 import 'package:flutter_merchant/models/product.dart';
@@ -8,9 +8,17 @@ import 'package:http/http.dart' as http;
 class ProductProvider with ChangeNotifier {
   List<Product> _productList = [];
 
+  String getProductApiEndpoint() {
+    if (kIsWeb) {
+      return (WEB_SERVER_URL + API_ENDPOINT_PRODUCTS);
+    } else {
+      return (ANDROID_SERVER_URL + API_ENDPOINT_PRODUCTS);
+    }
+  }
+
   Future<List<Product>> getAllProducts() async {
     try {
-      final response = await http.get(Uri.parse(API_ENDPOINT_PRODUCTS + '/'));
+      final response = await http.get(Uri.parse(getProductApiEndpoint() + '/'));
       Iterable responseData = json.decode(response.body);
       _productList = List<Product>.from(
           responseData.map((object) => Product.fromJson(object)));
@@ -25,7 +33,7 @@ class ProductProvider with ChangeNotifier {
   Future<Product> getProductByID(String productID) async {
     try {
       final response =
-          await http.get(Uri.parse(API_ENDPOINT_PRODUCTS + '/' + productID));
+          await http.get(Uri.parse(getProductApiEndpoint() + '/' + productID));
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       Product product = Product.fromJson(extractedData);
       return product;
@@ -39,7 +47,7 @@ class ProductProvider with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     final requestBody = jsonEncode(product.toJson());
     try {
-      final response = await http.post(Uri.parse(API_ENDPOINT_PRODUCTS),
+      final response = await http.post(Uri.parse(getProductApiEndpoint()),
           body: requestBody,
           headers: <String, String>{
             'Content-Type': 'application/json',
@@ -60,7 +68,7 @@ class ProductProvider with ChangeNotifier {
     final requestBody = jsonEncode(product.toJson());
     try {
       final response = await http.patch(
-          Uri.parse(API_ENDPOINT_PRODUCTS + '/' + productID),
+          Uri.parse(getProductApiEndpoint() + '/' + productID),
           body: requestBody,
           headers: <String, String>{
             'Content-Type': 'application/json',
@@ -82,7 +90,7 @@ class ProductProvider with ChangeNotifier {
     final requestBody = jsonEncode({"isDeleted": true});
     try {
       final response = await http.patch(
-          Uri.parse(API_ENDPOINT_PRODUCTS + '/' + productID),
+          Uri.parse(getProductApiEndpoint() + '/' + productID),
           body: requestBody,
           headers: <String, String>{
             'Content-Type': 'application/json',

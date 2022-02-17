@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
+import 'package:flutter_merchant/firebase_options.dart';
 import 'package:flutter_merchant/providers/product_provider.dart';
 import 'package:flutter_merchant/screens/add_product_screen.dart';
 import 'package:flutter_merchant/screens/home_screen.dart';
@@ -10,10 +11,13 @@ import 'package:flutter_merchant/screens/registration_screen.dart';
 import 'package:flutter_merchant/screens/update_product_screen.dart';
 import 'package:flutter_merchant/widgets/common_dialog.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
