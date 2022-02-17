@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
-import 'package:flutter_merchant/main.dart';
 import 'package:flutter_merchant/models/product.dart';
 import 'package:flutter_merchant/providers/product_provider.dart';
 import 'package:flutter_merchant/widgets/common_dialog.dart';
@@ -18,12 +17,6 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
 
   Future<void> _initProducts() async {
     try {
-      _productList =
-          Provider.of<ProductProvider>(context, listen: false).products;
-      setState(() {
-        _isLoading = false;
-      });
-      /*
       Provider.of<ProductProvider>(context, listen: false)
           .getAllProducts()
           .then((value) {
@@ -32,7 +25,6 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
           _isLoading = false;
         });
       });
-      */
     } catch (error) {
       print('Error: ' + error.toString());
       setState(() {
@@ -58,6 +50,7 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
     return Container(
       height: mediaQuery.size.height / 1.3,
       padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+      margin: EdgeInsets.only(top: 20),
       decoration: MerchantDecoration.productsSectionDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,17 +76,7 @@ class _ProductsSectionState extends State<ProductsSection> with RouteAware {
                       "No pending bookings yet.",
                       style: TextStyle(color: Colors.grey),
                     )
-                  :
-                  // Column(
-                  //     children: <Widget>[
-                  //       ..._productList
-                  //           .map((product) => ProductCard(
-                  //                 product: product,
-                  //               ))
-                  //           .toList()
-                  //     ],
-                  //   ),
-                  Consumer<ProductProvider>(
+                  : Consumer<ProductProvider>(
                       builder: (context, provider, listTile) {
                       return Expanded(
                         child: MediaQuery.removePadding(

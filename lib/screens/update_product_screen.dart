@@ -1,14 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
 import 'package:flutter_merchant/models/product.dart';
 import 'package:flutter_merchant/providers/product_provider.dart';
-import 'package:flutter_merchant/widgets/add_product_section.dart';
 import 'package:flutter_merchant/widgets/common_dialog.dart';
-import 'package:flutter_merchant/widgets/header_section.dart';
 import 'package:flutter_merchant/widgets/option_dialog.dart';
-import 'package:flutter_merchant/widgets/products_section.dart';
 import 'package:provider/provider.dart';
 
 class UpdateProductScreen extends StatefulWidget {
@@ -26,7 +22,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
   final _productDetailsController = TextEditingController();
   var productID;
   var productProvider;
-  Product product = new Product();
+  var product;
   bool _isLoading = true;
 
   Future _updateProduct() async {
@@ -40,9 +36,6 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
       );
 
       productProvider.updateProduct(updatedProduct);
-
-      debugPrint("Updated product");
-
       Navigator.of(context).pop();
 
       showDialog(
@@ -68,8 +61,8 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
       ).then((toDelete) {
         if (toDelete) {
           productProvider.deleteProduct(productID);
-          debugPrint("Deleted product");
           Navigator.of(context).pop();
+
           showDialog(
             context: context,
             builder: (BuildContext context) => CommonDialog(
@@ -97,17 +90,34 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
     super.dispose();
   }
 
-  void _initScreen() {
+  Future<void> _initScreen() async {
     productProvider = Provider.of<ProductProvider>(context, listen: false);
     productID = ModalRoute.of(context)!.settings.arguments as String;
-    product = productProvider.getProductByID(productID);
-    _nameController.text = product.name.toString();
-    _priceController.text = product.price.toString();
-    _quantityController.text = product.quantity.toString();
-    _productDetailsController.text = product.productDetails.toString();
-    setState(() {
-      _isLoading = false;
-    });
+
+    try {
+      Provider.of<ProductProvider>(context, listen: false)
+          .getProductByID(productID)
+          .then((value) {
+        setState(() {
+          product = value;
+          _nameController.text = product.name.toString();
+          _priceController.text = product.price.toString();
+          _quantityController.text = product.quantity.toString();
+          _productDetailsController.text = product.productDetails.toString();
+          _isLoading = false;
+        });
+      });
+    } catch (error) {
+      print('Error: ' + error.toString());
+      setState(() {
+        _isLoading = false;
+      });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => CommonDialog("Oops!",
+            "There was an error while loading the product. Please try again."),
+      );
+    }
   }
 
   @override

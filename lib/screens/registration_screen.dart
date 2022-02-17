@@ -43,12 +43,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   String? _validatePassword(String value) {
-    /* Password regex pattern to check if the password contains the following: 
-      (?=.*[A-Za-z]) -> Must contain at least one letter.
-      (?=.*\d)       -> Must contain at least one number.
-      [A-Za-z\d]     -> Any alphabetic or numeric characters only. 
-      {8,30}         -> Minimum of 8 and maximum of 30 characters only.
-    */
     final validCharacters = RegExp(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$");
     if (value.isEmpty) {
       return 'Please input a password.';

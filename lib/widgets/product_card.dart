@@ -5,7 +5,7 @@ import 'package:flutter_merchant/screens/update_product_screen.dart';
 import 'package:intl/intl.dart';
 
 class ProductCard extends StatefulWidget {
-  Product? product;
+  final Product? product;
 
   ProductCard({this.product});
 

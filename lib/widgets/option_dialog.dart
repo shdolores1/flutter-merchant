@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
 
 class OptionDialog extends StatefulWidget {
-  String title, content;
+  final String title, content;
   OptionDialog(this.title, this.content);
   @override
   _OptionDialogState createState() => _OptionDialogState();

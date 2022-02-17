@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
 
 class HeaderSection extends StatelessWidget {
-  final user = FirebaseAuth.instance.currentUser ?? null;
+  final user = FirebaseAuth.instance.currentUser;
 
   void _logout() {
     try {
       FirebaseAuth.instance.signOut();
-      debugPrint("Logged out");
     } on FirebaseAuthException catch (e) {
       debugPrint(e.message);
     }

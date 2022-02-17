@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
 
 class CommonDialog extends StatefulWidget {
-  String title, content;
+  final String title, content;
   CommonDialog(this.title, this.content);
   @override
   _CommonDialogState createState() => _CommonDialogState();
