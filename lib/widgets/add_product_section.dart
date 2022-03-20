@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
-import 'package:flutter_merchant/screens/add_product_screen.dart';
+import 'package:flutter_merchant/locators/service_locator.dart';
+import 'package:flutter_merchant/screens/products/add_product/widget.dart';
+import 'package:flutter_merchant/screens/products_section/bloc.dart';
 
 class AddProductSection extends StatelessWidget {
+  final ProductsSectionBloc _productsSectionBloc =
+      ServiceLocator.get<ProductsSectionBloc>();
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed(AddProductScreen.routeName);
+        Navigator.of(context)
+            .pushNamed(AddProductScreen.routeName)
+            .then((value) {
+          debugPrint("Reload product section");
+          Future.delayed(Duration(milliseconds: 100), () {
+            _productsSectionBloc.add(ProductsSectionLoadStarted());
+          });
+        });
       },
       child: Container(
         width: mediaQuery.size.width - 30,

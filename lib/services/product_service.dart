@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/api_endpoints.dart';
-import 'package:flutter_merchant/models/product.dart';
+import 'package:flutter_merchant/models/responses/product.dart';
 import 'package:http/http.dart' as http;
 
-class ProductProvider with ChangeNotifier {
+class ProductService {
   List<Product> _productList = [];
 
   String getProductApiEndpoint() {
@@ -20,9 +20,11 @@ class ProductProvider with ChangeNotifier {
     try {
       final response = await http.get(Uri.parse(getProductApiEndpoint() + '/'));
       Iterable responseData = json.decode(response.body);
-      _productList = List<Product>.from(
+      // _productList = List<Product>.from(
+      //     responseData.map((object) => Product.fromJson(object)));
+      // return _productList;
+      return List<Product>.from(
           responseData.map((object) => Product.fromJson(object)));
-      return _productList;
     } catch (exception) {
       debugPrint("Exception in getting all products");
       debugPrint(exception.toString());
@@ -44,7 +46,21 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addProduct(Product product) async {
+  Future<Product> addProduct(
+    String productID,
+    String name,
+    double price,
+    num quantity,
+    String productDetails,
+  ) async {
+    Product product = new Product(
+      productID: productID,
+      name: name,
+      price: price,
+      quantity: quantity,
+      productDetails: productDetails,
+    );
+
     final requestBody = jsonEncode(product.toJson());
     try {
       final response = await http.post(Uri.parse(getProductApiEndpoint()),
@@ -53,9 +69,7 @@ class ProductProvider with ChangeNotifier {
             'Content-Type': 'application/json',
           });
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-      Product product = Product.fromJson(extractedData);
-      _productList.add(product);
-      notifyListeners();
+      return Product.fromJson(extractedData);
     } catch (exception) {
       debugPrint("Exception in adding products");
       debugPrint(exception.toString());
@@ -63,8 +77,20 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateProduct(Product product) async {
-    final productID = product.productID;
+  Future<Product> updateProduct(
+    String productID,
+    String name,
+    double price,
+    num quantity,
+    String productDetails,
+  ) async {
+    Product product = new Product(
+      productID: productID,
+      name: name,
+      price: price,
+      quantity: quantity,
+      productDetails: productDetails,
+    );
     final requestBody = jsonEncode(product.toJson());
     try {
       final response = await http.patch(
@@ -74,11 +100,11 @@ class ProductProvider with ChangeNotifier {
             'Content-Type': 'application/json',
           });
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-      Product product = Product.fromJson(extractedData);
-      var index = _productList
-          .indexWhere((element) => element.productID == product.productID);
-      _productList[index] = product;
-      notifyListeners();
+      // Product product = Product.fromJson(extractedData);
+      // var index = _productList
+      //     .indexWhere((element) => element.productID == product.productID);
+      // _productList[index] = product;
+      return Product.fromJson(extractedData);
     } catch (exception) {
       debugPrint("Exception in updating products");
       debugPrint(exception.toString());
@@ -86,7 +112,7 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteProduct(String productID) async {
+  Future<Product> deleteProduct(String productID) async {
     final requestBody = jsonEncode({"isDeleted": true});
     try {
       final response = await http.patch(
@@ -96,10 +122,10 @@ class ProductProvider with ChangeNotifier {
             'Content-Type': 'application/json',
           });
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-      Product product = Product.fromJson(extractedData);
-      _productList
-          .removeWhere((element) => element.productID == product.productID);
-      notifyListeners();
+      // Product product = Product.fromJson(extractedData);
+      // _productList
+      //     .removeWhere((element) => element.productID == product.productID);
+      return Product.fromJson(extractedData);
     } catch (exception) {
       debugPrint("Exception in deleting products");
       debugPrint(exception.toString());

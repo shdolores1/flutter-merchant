@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_merchant/constants/merchant_theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_merchant/firebase_options.dart';
-import 'package:flutter_merchant/providers/product_provider.dart';
-import 'package:flutter_merchant/screens/add_product_screen.dart';
-import 'package:flutter_merchant/screens/home_screen.dart';
-import 'package:flutter_merchant/screens/login_screen.dart';
+import 'package:flutter_merchant/locators/service_locator.dart';
+import 'package:flutter_merchant/screens/auth/bloc.dart';
+import 'package:flutter_merchant/screens/home/widget.dart';
+import 'package:flutter_merchant/screens/login/widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_merchant/screens/registration_screen.dart';
-import 'package:flutter_merchant/screens/update_product_screen.dart';
-import 'package:flutter_merchant/widgets/common_dialog.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_merchant/screens/products/add_product/widget.dart';
+import 'package:flutter_merchant/screens/products/update_product/widget.dart';
+import 'package:flutter_merchant/screens/registration/widget.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,41 +17,27 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await ServiceLocator.init();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => ProductProvider(),
-        ),
-      ],
+    return BlocProvider(
+      create: (context) => ServiceLocator.get<AuthBloc>(),
       child: MaterialApp(
-        title: 'Flutter Merchant',
         home: StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: MerchantColors.blue,
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return CommonDialog("Oops!", snapshot.error.toString());
-              } else if (snapshot.hasData) {
+              if (snapshot.hasData) {
                 return HomeScreen();
-              } else {
-                return LoginScreen();
               }
+              return Login();
             }),
         routes: {
-          LoginScreen.routeName: (ctx) => LoginScreen(),
+          Login.routeName: (ctx) => Login(),
           HomeScreen.routeName: (ctx) => HomeScreen(),
           RegistrationScreen.routeName: (ctx) => RegistrationScreen(),
           AddProductScreen.routeName: (ctx) => AddProductScreen(),

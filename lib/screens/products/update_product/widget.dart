@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
-import 'package:flutter_merchant/models/product.dart';
-import 'package:flutter_merchant/providers/product_provider.dart';
+import 'package:flutter_merchant/locators/service_locator.dart';
+import 'package:flutter_merchant/screens/products/delete_product/bloc.dart';
+import 'package:flutter_merchant/screens/products/update_product/bloc.dart';
+import 'package:flutter_merchant/screens/products/view_product/bloc.dart';
 import 'package:flutter_merchant/widgets/common_dialog.dart';
 import 'package:flutter_merchant/widgets/option_dialog.dart';
-import 'package:provider/provider.dart';
 
 class UpdateProductScreen extends StatefulWidget {
   static const routeName = '/update-product-screen';
@@ -15,6 +17,13 @@ class UpdateProductScreen extends StatefulWidget {
 }
 
 class _UpdateProductScreenState extends State<UpdateProductScreen> {
+  final ViewProductBloc _viewProductBloc =
+      ServiceLocator.get<ViewProductBloc>();
+  final UpdateProductBloc _updateProductBloc =
+      ServiceLocator.get<UpdateProductBloc>();
+  final DeleteProductBloc _deleteProductBloc =
+      ServiceLocator.get<DeleteProductBloc>();
+
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
@@ -27,15 +36,26 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
 
   Future _updateProduct() async {
     try {
-      Product updatedProduct = Product(
-        productID: productID,
-        name: _nameController.text,
-        price: double.parse(_priceController.text),
-        quantity: num.parse(_quantityController.text),
-        productDetails: _productDetailsController.text,
+      // Product updatedProduct = Product(
+      //   productID: productID,
+      //   name: _nameController.text,
+      //   price: double.parse(_priceController.text),
+      //   quantity: num.parse(_quantityController.text),
+      //   productDetails: _productDetailsController.text,
+      // );
+
+      // productProvider.updateProduct(updatedProduct);
+
+      _updateProductBloc.add(
+        UpdateProductStarted(
+          productID: productID,
+          name: _nameController.text,
+          price: double.parse(_priceController.text),
+          quantity: num.parse(_quantityController.text),
+          productDetails: _productDetailsController.text,
+        ),
       );
 
-      productProvider.updateProduct(updatedProduct);
       Navigator.of(context).pop();
 
       showDialog(
@@ -60,7 +80,14 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
             "Are you sure?", "This will remove the product from your store."),
       ).then((toDelete) {
         if (toDelete) {
-          productProvider.deleteProduct(productID);
+          // productProvider.deleteProduct(productID);
+
+          _deleteProductBloc.add(
+            DeleteProductStarted(
+              productID: productID,
+            ),
+          );
+
           Navigator.of(context).pop();
 
           showDialog(
@@ -91,33 +118,39 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
   }
 
   Future<void> _initScreen() async {
-    productProvider = Provider.of<ProductProvider>(context, listen: false);
+    // productProvider = Provider.of<ProductProvider>(context, listen: false);
     productID = ModalRoute.of(context)!.settings.arguments as String;
 
-    try {
-      Provider.of<ProductProvider>(context, listen: false)
-          .getProductByID(productID)
-          .then((value) {
-        setState(() {
-          product = value;
-          _nameController.text = product.name.toString();
-          _priceController.text = product.price.toString();
-          _quantityController.text = product.quantity.toString();
-          _productDetailsController.text = product.productDetails.toString();
-          _isLoading = false;
-        });
-      });
-    } catch (error) {
-      print('Error: ' + error.toString());
-      setState(() {
-        _isLoading = false;
-      });
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => CommonDialog("Oops!",
-            "There was an error while loading the product. Please try again."),
-      );
-    }
+    _viewProductBloc.add(
+      ViewProductStarted(
+        productID: productID,
+      ),
+    );
+
+    // try {
+    //   Provider.of<ProductProvider>(context, listen: false)
+    //       .getProductByID(productID)
+    //       .then((value) {
+    //     setState(() {
+    //       product = value;
+    //       _nameController.text = product.name.toString();
+    //       _priceController.text = product.price.toString();
+    //       _quantityController.text = product.quantity.toString();
+    //       _productDetailsController.text = product.productDetails.toString();
+    //       _isLoading = false;
+    //     });
+    //   });
+    // } catch (error) {
+    //   print('Error: ' + error.toString());
+    //   setState(() {
+    //     _isLoading = false;
+    //   });
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) => CommonDialog("Oops!",
+    //         "There was an error while loading the product. Please try again."),
+    //   );
+    // }
   }
 
   @override
@@ -142,13 +175,23 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
           onTap: () => Navigator.of(context).pop(),
         ),
       ),
-      body: (_isLoading)
-          ? Center(
-              child: CircularProgressIndicator(
-                color: MerchantColors.blue,
-              ),
-            )
-          : SingleChildScrollView(
+      body: BlocBuilder<ViewProductBloc, ViewProductState>(
+        bloc: _viewProductBloc,
+        builder: (context, state) {
+          if (state is ViewProductInitial) {
+            return const Text(
+              "Cannot load product details",
+              style: TextStyle(color: Colors.grey),
+            );
+          }
+
+          if (state is ViewProductInProgress) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is ViewProductSuccess) {
+            final product = state.product;
+            return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -172,7 +215,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
                       SizedBox(height: 20),
                       TextFormField(
                         keyboardType: TextInputType.text,
-                        controller: _nameController,
+                        controller: _nameController..text = product.name,
                         textInputAction: TextInputAction.next,
                         inputFormatters: <TextInputFormatter>[
                           LengthLimitingTextInputFormatter(20)
@@ -195,7 +238,8 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
                       SizedBox(height: 10),
                       TextFormField(
                         keyboardType: TextInputType.number,
-                        controller: _priceController,
+                        controller: _priceController
+                          ..text = product.price.toString(),
                         textInputAction: TextInputAction.next,
                         inputFormatters: <TextInputFormatter>[
                           FilteringTextInputFormatter.allow(
@@ -219,7 +263,8 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
                       SizedBox(height: 10),
                       TextFormField(
                         keyboardType: TextInputType.number,
-                        controller: _quantityController,
+                        controller: _quantityController
+                          ..text = product.quantity.toString(),
                         textInputAction: TextInputAction.next,
                         inputFormatters: <TextInputFormatter>[
                           FilteringTextInputFormatter.digitsOnly,
@@ -243,7 +288,8 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
                       SizedBox(height: 10),
                       TextFormField(
                         keyboardType: TextInputType.text,
-                        controller: _productDetailsController,
+                        controller: _productDetailsController
+                          ..text = product.productDetails,
                         textInputAction: TextInputAction.next,
                         maxLines: 3,
                         inputFormatters: <TextInputFormatter>[
@@ -318,7 +364,19 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
                   ),
                 ),
               ),
-            ),
+            );
+          }
+
+          if (state is ViewProductFailure) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) =>
+                  CommonDialog("Oops!", state.message.toString()),
+            );
+          }
+          return Container();
+        },
+      ),
     );
   }
 }

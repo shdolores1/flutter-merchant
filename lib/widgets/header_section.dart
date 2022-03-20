@@ -1,17 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
+import 'package:flutter_merchant/screens/auth/bloc.dart';
 
 class HeaderSection extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser;
-
-  void _logout() {
-    try {
-      FirebaseAuth.instance.signOut();
-    } on FirebaseAuthException catch (e) {
-      debugPrint(e.message);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +33,9 @@ class HeaderSection extends StatelessWidget {
             ],
           ),
           TextButton(
-            onPressed: _logout,
+            onPressed: () {
+              context.read<AuthBloc>().add(LogoutRequested());
+            },
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: Size(50, 50),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_merchant/constants/merchant_theme.dart';
-import 'package:flutter_merchant/models/product.dart';
-import 'package:flutter_merchant/screens/update_product_screen.dart';
+import 'package:flutter_merchant/locators/service_locator.dart';
+import 'package:flutter_merchant/models/view_models/product_view_model.dart';
+import 'package:flutter_merchant/screens/products/update_product/widget.dart';
+import 'package:flutter_merchant/screens/products_section/bloc.dart';
 import 'package:intl/intl.dart';
 
 class ProductCard extends StatefulWidget {
-  final Product? product;
+  final ProductViewModel? product;
 
   ProductCard({this.product});
 
@@ -14,6 +16,8 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
+  final ProductsSectionBloc _productsSectionBloc =
+      ServiceLocator.get<ProductsSectionBloc>();
   final currency = new NumberFormat.currency(
       locale: "en_PH", name: "PHP", symbol: "₱", decimalDigits: 0);
 
@@ -21,10 +25,15 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed(
-          UpdateProductScreen.routeName,
-          arguments: widget.product?.productID,
-        );
+        Navigator.of(context)
+            .pushNamed(UpdateProductScreen.routeName,
+                arguments: widget.product?.productID)
+            .then((value) {
+          debugPrint("Reload product section");
+          Future.delayed(Duration(milliseconds: 100), () {
+            _productsSectionBloc.add(ProductsSectionLoadStarted());
+          });
+        });
       },
       child: Container(
         padding: EdgeInsets.all(10),
